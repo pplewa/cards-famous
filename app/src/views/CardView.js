@@ -21,14 +21,25 @@ define(function(require, exports, module) {
     CardView.prototype.constructor = CardView;
 
     CardView.DEFAULT_OPTIONS = {
+        title: 'card'
     };
 
     function _createBackground(){
         var background = new Surface({
-            content: 'card'
+            size: [200, 300],
+            content: this.options.title,
+            properties: {
+                color: '#fff',
+                textAlign: 'center',
+                background: '#333'
+            }
         });
 
-        this.add(background);
+        var backgroundModifier = new StateModifier({
+            // origin: [0.5, 0.5]
+        });
+
+        this.add(backgroundModifier).add(background);
     }
 
     module.exports = CardView;
