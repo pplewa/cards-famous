@@ -41,9 +41,9 @@ define(function(require, exports, module) {
             // origin: [0.5, 0.5]
         });
 
-        var draggable = new Draggable({
-            // projection: Draggable.DIRECTION_X,
-            xRange: [-220, 0],
+        var draggable = this.drag = new Draggable({
+            projection: 'x',
+            xRange: [-225, 0],
             yRange: [0, 0],
             transition: { duration: 500, curve: 'easeOut' }
         });
@@ -59,19 +59,33 @@ define(function(require, exports, module) {
 
         background.pipe(draggable);
 
-        draggable.on('start', function(){
-            this._eventOutput.emit('nextCard');
-            // console.log('abc');
-        }.bind(this));
+        // draggable.sync.on('update', function(evt){
+        //     if (evt.delta[0] !== 1) return;
+        //     // this._eventOutput.emit('nextCard');
+        //     console.log(evt.offsetX);
+        // });
+        // 
+        var _this = this;
+        draggable.on('update', function(data){
+            if (!_this.startDirection) {
+                _this.startDirection = data.position[0];
+            }
+            if (_this.startDirection >= 0 && this._active) {
+                return this.deactivate();
+            }
+        });
+
+        draggable.sync.on('end', function(){
+            draggable.activate();
+        })
 
         draggable.on('end', function(data){
+            _this.startDirection = 0;
             if (data.position[0] < -100) {
-                this.setPosition([-250, 0], { duration: 100 });
+                this.setPosition([-225, 0], { duration: 100 });
             } else {
                 this.setPosition([0, 0], { duration: 100 });
             }
-            // this._eventOutput.emit('nextCard');
-            // console.log('abc');
         });
 
         this.add(draggable).add(background);
