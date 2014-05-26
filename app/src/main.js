@@ -6,7 +6,8 @@ define(function(require, exports, module) {
     var DeckView = require('views/DeckView');
 
     var mainContext = Engine.createContext();
-    var deckView = new DeckView();
+   	// mainContext.setPerspective(1000);
 
+    var deckView = new DeckView();
     mainContext.add(deckView);
 });

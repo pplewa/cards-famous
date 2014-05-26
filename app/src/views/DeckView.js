@@ -39,14 +39,18 @@ define(function(require, exports, module) {
             // align: [0.5, 0.5]
         });
 
-        var deckContainer = new ContainerSurface({
-            size: [190, 290],
+        this.deckContainer = new ContainerSurface({
+            size: [400, 660],
             properties: {
                 overflow: 'hidden'
             }
         });
 
-        this.mainNode = this.add(this.rootModifier);
+        // this.deckContainer.add(new StateModifier({
+        //     transform: Transform.translate(0, 0, 0.1)
+        // }));
+
+        this.mainNode = this.add(this.rootModifier).add(this.deckContainer);
 
         this.currentIndex = 0;
         _createDeck.call(this);
@@ -65,13 +69,13 @@ define(function(require, exports, module) {
             var index = (this.currentIndex + 1) % 3;
             var card = this.cards[this.currentIndex + 1];
             if (card) {
-                card.drag.setPosition([0, 0]);
+                card.draggable.setPosition([0, 0]);
                 this.renderNodes[index].set(card);
             } 
             if (!this.cards[this.currentIndex]) {
                 this.currentIndex = 0;
                 for (var i = 0; i < 3; i++) {
-                    this.cards[i].drag.setPosition([0, 0]);
+                    this.cards[i].draggable.setPosition([0, 0]);
                     this.renderNodes[i].set(this.cards[i]);
                 }
             }
@@ -86,7 +90,7 @@ define(function(require, exports, module) {
             var index = (this.currentIndex - 1) % 3;
             var card = this.cards[this.currentIndex - 1];
             if (card) {
-                card.drag.setPosition([-225, 0]);
+                card.draggable.setPosition([-500, 0]);
                 this.renderNodes[index].set(card);
             }
         }
@@ -96,22 +100,46 @@ define(function(require, exports, module) {
     function _createDeck() {
         this.cards = [];
         for (var i = 0; i < CARDS.length; i++) {       
-            var cardView = new CardView({ title: CARDS[i].title, transform: Transform.translate(0, 0, -i*0.1) });
-            cardView.on('nextCard', this.showNextCard.bind(this));
+            var cardView = new CardView({ 
+                title: CARDS[i].title, 
+                zIndex: CARDS.length-i
+                // transform: Transform.translate(0, 0, (i * 0.1))
+            });
 
-            cardView.drag.sync.on('update', function(evt){
-                var previousCard = this.cards[this.currentIndex - 1];
-                if (cardView.startDirection < 0 || !previousCard) return;
-                previousCard.drag.setPosition([evt.position[0] - 225, 0]);
+            // slide left
+            cardView.draggable.on('update', function(data){
+                var currentCard = this.cards[this.currentIndex];
+                if (!currentCard.startDirection) {
+                    currentCard.startDirection = data.position[0];
+                }
+                if (currentCard.startDirection >= 0 && currentCard.draggable._active) {
+                    return currentCard.draggable.deactivate();
+                }
+            }.bind(this));
+            cardView.draggable.on('end', function(data){
+                var currentCard = this.cards[this.currentIndex];
+                currentCard.startDirection = 0;
+                if (data.position[0] < -100) {
+                    currentCard.draggable.setPosition([-500, 0], { duration: 100 }, this.showNextCard.bind(this));
+                } else {
+                    currentCard.draggable.setPosition([0, 0], { duration: 100 });
+                }
             }.bind(this));
 
-            cardView.drag.sync.on('end', function(data){
+            // slide right
+            cardView.draggable.sync.on('update', function(evt){
+                var previousCard = this.cards[this.currentIndex - 1];
+                if (cardView.startDirection < 0 || !previousCard) return;
+                previousCard.draggable.setPosition([evt.position[0] - 500, 0]);
+            }.bind(this));
+            cardView.draggable.sync.on('end', function(data){
+                this.cards[this.currentIndex].draggable.activate();
                 var previousCard = this.cards[this.currentIndex - 1];
                 if (cardView.startDirection < 0 || !previousCard) return;
                 if (data.position[0] < 100) {
-                    previousCard.drag.setPosition([-225, 0], { duration: 100 });
+                    previousCard.draggable.setPosition([-500, 0], { duration: 100 });
                 } else {
-                    previousCard.drag.setPosition([0, 0], { duration: 100 });
+                    previousCard.draggable.setPosition([0, 0], { duration: 100 });
                     this.showPrevCard();
                 }
             }.bind(this));
@@ -124,7 +152,7 @@ define(function(require, exports, module) {
             var renderNode = new RenderNode();
             this.renderNodes.push(renderNode);
             renderNode.add(this.cards[i])
-            this.mainNode.add(renderNode);
+            this.deckContainer.add(renderNode);
         }
     }
 

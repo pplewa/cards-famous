@@ -28,72 +28,43 @@ define(function(require, exports, module) {
 
     function _createBackground(){
         var background = new Surface({
-            size: [190, 290],
+            size: [390, 590],
             content: this.options.title,
             properties: {
-                color: '#fff',
+                color: '#000',
+                fontSize: '100px',
+                lineHeight: '550px',
                 textAlign: 'center',
-                background: '#333',
-                border: '5px #ff0 solid'
+                background: '#f0f0f0',
+                border: '5px #333 solid',
+                borderRadius: '20px',
+                boxShadow: '2px 2px 2px rgba(0,0,0,0.1)',
+                zIndex: this.options.zIndex
             }
         });
 
         var backgroundModifier = new StateModifier({
-            // origin: [0.5, 0.5]
+            origin: [0.5, 0.5],
             transform: this.options.transform
         });
 
-        var draggable = this.drag = new Draggable({
+        this.draggable = new Draggable({
             projection: 'x',
-            xRange: [-225, 0],
+            xRange: [-500, 0],
             yRange: [0, 0],
             transition: { duration: 500, curve: 'easeOut' }
         });
 
-        draggable.modify = function modify(target) {
+        this.draggable.modify = function modify(target) {
             var pos = this.getPosition();
             return {
-                // transform: Transform.translate(pos[0], pos[1]),
                 transform: Transform.thenMove(Transform.rotateZ(pos[0]/(1500)), [pos[0], pos[1], 0]),
                 target: target
             };
         };
 
-        background.pipe(draggable);
-
-        // draggable.sync.on('update', function(evt){
-        //     if (evt.delta[0] !== 1) return;
-        //     // this._eventOutput.emit('nextCard');
-        //     console.log(evt.offsetX);
-        // });
-        // 
-        var _this = this;
-        draggable.on('update', function(data){
-            if (!_this.startDirection) {
-                _this.startDirection = data.position[0];
-            }
-            if (_this.startDirection >= 0 && this._active) {
-                return this.deactivate();
-            }
-        });
-
-        draggable.sync.on('end', function(){
-            draggable.activate();
-        })
-
-        draggable.on('end', function(data){
-            _this.startDirection = 0;
-            if (data.position[0] < -100) {
-                this.setPosition([-225, 0], { duration: 100 }, function(){
-                    _this._eventOutput.emit('nextCard');
-                });
-            } else {
-                this.setPosition([0, 0], { duration: 100 });
-                // _this._eventOutput.emit('prevCard');
-            }
-        });
-
-        this.add(backgroundModifier).add(draggable).add(background);
+        background.pipe(this.draggable);
+        this.add(backgroundModifier).add(this.draggable).add(background);
     }
 
     module.exports = CardView;
