@@ -23,22 +23,24 @@ define(function(require, exports, module) {
 
     CardView.DEFAULT_OPTIONS = {
         title: 'card',
-
+        transform: Transform.behind
     };
 
     function _createBackground(){
         var background = new Surface({
-            size: [200, 300],
+            size: [190, 290],
             content: this.options.title,
             properties: {
                 color: '#fff',
                 textAlign: 'center',
-                background: '#333'
+                background: '#333',
+                border: '5px #ff0 solid'
             }
         });
 
         var backgroundModifier = new StateModifier({
             // origin: [0.5, 0.5]
+            transform: this.options.transform
         });
 
         var draggable = this.drag = new Draggable({
@@ -82,13 +84,16 @@ define(function(require, exports, module) {
         draggable.on('end', function(data){
             _this.startDirection = 0;
             if (data.position[0] < -100) {
-                this.setPosition([-225, 0], { duration: 100 });
+                this.setPosition([-225, 0], { duration: 100 }, function(){
+                    _this._eventOutput.emit('nextCard');
+                });
             } else {
                 this.setPosition([0, 0], { duration: 100 });
+                // _this._eventOutput.emit('prevCard');
             }
         });
 
-        this.add(draggable).add(background);
+        this.add(backgroundModifier).add(draggable).add(background);
     }
 
     module.exports = CardView;
