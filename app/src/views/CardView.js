@@ -22,7 +22,7 @@ define(function(require, exports, module) {
 	CardView.prototype.constructor = CardView;
 
 	CardView.DEFAULT_OPTIONS = {
-		title: 'card',
+		content: 'card',
 		size: [390, 590],
 		properties: {},
 		origin: [0.5, 0.5],
@@ -32,7 +32,7 @@ define(function(require, exports, module) {
 	function _createCard(){
 		var card = new Surface({
 			size: this.options.size,
-			content: this.options.title,
+			content: this.options.content,
 			properties: this.options.properties
 		});
 
