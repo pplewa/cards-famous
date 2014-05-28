@@ -23,14 +23,12 @@ define(function(require, exports, module) {
 
 	CardView.DEFAULT_OPTIONS = {
 		content: 'card',
-		size: [390, 590],
 		properties: {},
-		origin: [0.5, 0.5],
 		transform: Transform.behind
 	};
 
 	function _createCard(){
-		var card = new Surface({
+		this.background = new Surface({
 			size: this.options.size,
 			content: this.options.content,
 			properties: this.options.properties
@@ -55,8 +53,8 @@ define(function(require, exports, module) {
 			};
 		};
 
-		card.pipe(this.draggable);
-		this.add(cardModifier).add(this.draggable).add(card);
+		this.background.pipe(this.draggable);
+		this.add(cardModifier).add(this.draggable).add(this.background);
 	}
 
 	module.exports = CardView;

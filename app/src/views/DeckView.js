@@ -4,16 +4,11 @@ define(function(require, exports, module) {
 
 	var View = require('famous/core/View');
 	var ContainerSurface = require('famous/surfaces/ContainerSurface');
-	// var Surface = require('famous/core/Surface');
-	// var Transform = require('famous/core/Transform');
-	// var StateModifier = require('famous/modifiers/StateModifier');
 	var Modifier = require('famous/core/Modifier');
 	var Transitionable = require('famous/transitions/Transitionable');
 
 	var RenderNode = require('famous/core/RenderNode');
 	var CardView = require('views/CardView');
-
-	var CardData = require('data/CardData');
 
 	/*
 	 * @name DeckView
@@ -31,9 +26,10 @@ define(function(require, exports, module) {
 		});
 
 		this.deckContainer = new ContainerSurface({
-			size: [400, 660],
+			size: [this.options.size * 18, this.options.size * 23],
 			properties: {
-				overflow: 'hidden'
+				overflow: 'hidden',
+				fontSize: this.options.size + 'px'
 			}
 		});
 
@@ -49,9 +45,21 @@ define(function(require, exports, module) {
 	DeckView.prototype.constructor = DeckView;
 
 	DeckView.DEFAULT_OPTIONS = {
+		cards: [],
+		size: 20
+	};
+
+	DeckView.prototype.showCard = function(index) {
+
 	};
 
 	DeckView.prototype.showNextCard = function() {
+		var currentCard = this.cards[this.currentIndex];
+		if (currentCard.draggable.getPosition()[0] === 0) {
+			currentCard.draggable.setPosition([-300, 0], { duration: 200 }, this.showNextCard.bind(this));
+			return;
+		}
+
 		this.currentIndex += 1;
 		if (this.currentIndex > 1) {
 			var index = (this.currentIndex + 1) % 3;
@@ -78,16 +86,37 @@ define(function(require, exports, module) {
 	};
 
 	DeckView.prototype.showPrevCard = function() {
-		this.currentIndex -= 1;
-		if (this.currentIndex > 0) {
-			var index = (this.currentIndex - 1) % 3;
-			var card = this.cards[this.currentIndex - 1];
-			if (card) {
-				card.draggable.setPosition([-500, 0]);
-				this.renderNodes[index].set(card);
+		var previousCard = this.cards[this.currentIndex - 1];
+		if (!previousCard) {
+			this.currentIndex = this.options.cards.length - 1;
+			previousCard = this.cards[this.currentIndex - 1];
+
+			this.cards[this.options.cards.length-1].draggable.setPosition([0, 0]);
+			this.renderNodes[0].set(this.cards[this.options.cards.length-1]);
+
+			this.cards[this.options.cards.length-2].draggable.setPosition([-300, 0]);
+			this.renderNodes[2].set(this.cards[this.options.cards.length-2]);
+
+			this.cards[this.options.cards.length-3].draggable.setPosition([-300, 0]);
+			this.renderNodes[1].set(this.cards[this.options.cards.length-3]);
+
+			this.opacity.set(0, { duration: 0 });
+			this.opacity.set(1, { duration: 100 });
+			this._eventOutput.emit('updateIndex', this.currentIndex + 1);
+		} else if (previousCard.draggable.getPosition()[0] !== 0) {
+			previousCard.draggable.setPosition([0, 0], { duration: 200 }, this.showPrevCard.bind(this));
+		} else {
+			this.currentIndex -= 1;
+			if (this.currentIndex > 0) {
+				var index = (this.currentIndex - 1) % 3;
+				var card = this.cards[this.currentIndex - 1];
+				if (card && this.currentIndex) {
+					card.draggable.setPosition([-300, 0]);
+					this.renderNodes[index].set(card);
+				}
 			}
+			this._eventOutput.emit('updateIndex', this.currentIndex + 1);
 		}
-		this._eventOutput.emit('updateIndex', this.currentIndex + 1);
 	};
 
 	function _onLeftMove(data) {
@@ -103,22 +132,21 @@ define(function(require, exports, module) {
 		var currentCard = this.cards[this.currentIndex];
 		currentCard.startDirection = 0;
 		if (data.position[0] < -100) {
-			currentCard.draggable.setPosition([-500, 0], { duration: 100 }, this.showNextCard.bind(this));
+			currentCard.draggable.setPosition([-300, 0], { duration: 100 }, this.showNextCard.bind(this));
 		} else {
 			currentCard.draggable.setPosition([0, 0], { duration: 100 });
 		}
 	}
 
-	function _onRightMove(evt) {
-		var previousCard = this.cards[this.currentIndex - 1];
+	function _onRightMove(evt, sth) {
 		var currentCard = this.cards[this.currentIndex];
+		var previousCard = this.cards[this.currentIndex - 1];
 		if (currentCard.startDirection < 0) return;
 		if (!previousCard) {
-			currentCard.draggable.setPosition([evt.position[0], 0]);
-			this.cards[this.currentIndex + 1].draggable.setPosition([evt.position[0], 0]);
-			this.cards[this.currentIndex + 2].draggable.setPosition([evt.position[0], 0]);
-		} else {
-			previousCard.draggable.setPosition([evt.position[0] - 500, 0]);
+			console.log(sth);
+			// currentCard.draggable.setPosition([evt.clientX, 0]);
+			// this.cards[this.currentIndex + 1].draggable.setPosition([evt.position[0], 0]);
+			// this.cards[this.currentIndex + 2].draggable.setPosition([evt.position[0], 0]);
 		}
 	}
 
@@ -134,30 +162,10 @@ define(function(require, exports, module) {
 				currentCard.draggable.setPosition([0, 0], { duration: 100 });
 				this.cards[this.currentIndex + 1].draggable.setPosition([0, 0], { duration: 100 });
 				this.cards[this.currentIndex + 2].draggable.setPosition([0, 0], { duration: 100 });
-			} else {
-				// currentCard.draggable.setPosition([500, 0], { duration: 100 });
-				// this.cards[this.currentIndex + 1].draggable.setPosition([500, 0], { duration: 100 });
-				// this.cards[this.currentIndex + 2].draggable.setPosition([500, 0], { duration: 100 });
-				this.currentIndex = CardData.length - 1;
-				// this.opacity.set(0, { duration: 0 });
-				// this.cards[CardData.length-3].draggable.setPosition([0, 0]);
-				// this.renderNodes[0].set(new Modifier());
-				// this.renderNodes[1].set(new Modifier());
-				// this.renderNodes[2].set(new Modifier());
-
-				this.cards[CardData.length-1].draggable.setPosition([0, 0]);
-				this.renderNodes[2].set(this.cards[CardData.length-1]);
-				// this.opacity.set(1, { duration: 100 });
-
-				this.cards[CardData.length-2].draggable.setPosition([-500, 0]);
-				this.renderNodes[1].set(this.cards[CardData.length-2]);
-
-				this.cards[CardData.length-3].draggable.setPosition([-500, 0]);
-				this.renderNodes[0].set(this.cards[CardData.length-3]);
 			}
 		} else {
 			if (data.position[0] < 100) {
-				previousCard.draggable.setPosition([-500, 0], { duration: 100 });
+				previousCard.draggable.setPosition([-300, 0], { duration: 100 });
 			} else {
 				previousCard.draggable.setPosition([0, 0], { duration: 100 });
 				this.showPrevCard();
@@ -167,18 +175,55 @@ define(function(require, exports, module) {
 
 	function _createDeck() {
 		this.cards = [];
-		for (var i = 0; i < CardData.length; i++) {
+		for (var i = 0; i < this.options.cards.length; i++) {
 			var cardView = new CardView({
-				content: CardData[i].content,
+				content: this.options.cards[i].content,
 				properties: {
-					zIndex: CardData.length - i
+					zIndex: this.options.cards.length - i
 				}
 			});
 
-			cardView.draggable.on('update', _onLeftMove.bind(this));
-			cardView.draggable.on('end', _onLeftEnd.bind(this));
+			// cardView.draggable.on('update', _onLeftMove.bind(this));
+			// cardView.draggable.on('end', _onLeftEnd.bind(this));
 			// cardView.draggable.sync.on('update', _onRightMove.bind(this));
 			// cardView.draggable.sync.on('end', _onRightEnd.bind(this));
+
+			// cardView.draggable.on('update', function(data){
+			// 	var currentCard = this.cards[this.currentIndex];
+			// 	if (!currentCard.startDirection) {
+			// 		currentCard.startDirection = data.position[0];
+			// 	}
+			// 	if (currentCard.startDirection >= 0 && currentCard.draggable._active) {
+			// 		return currentCard.draggable.deactivate();
+			// 	}
+			// }.bind(this));
+			// cardView.draggable.on('end', function(data){
+			// 	var currentCard = this.cards[this.currentIndex];
+			// 	currentCard.startDirection = 0;
+			// 	if (data.position[0] < -100) {
+			// 		currentCard.draggable.setPosition([-300, 0], { duration: 100 }, this.showNextCard.bind(this));
+			// 	} else {
+			// 		currentCard.draggable.setPosition([0, 0], { duration: 100 });
+			// 	}
+			// }.bind(this));
+
+			// // slide right
+			// cardView.draggable.sync.on('update', function(evt){
+			// 	var previousCard = this.cards[this.currentIndex - 1];
+			// 	if (cardView.startDirection < 0 || !previousCard) return;
+			// 	previousCard.draggable.setPosition([evt.position[0] - 300, 0]);
+			// }.bind(this));
+			// cardView.draggable.sync.on('end', function(data){
+			// 	this.cards[this.currentIndex].draggable.activate();
+			// 	var previousCard = this.cards[this.currentIndex - 1];
+			// 	if (cardView.startDirection < 0 || !previousCard) return;
+			// 	if (data.position[0] < 100) {
+			// 		previousCard.draggable.setPosition([-300, 0], { duration: 100 });
+			// 	} else {
+			// 		previousCard.draggable.setPosition([0, 0], { duration: 100 });
+			// 		this.showPrevCard();
+			// 	}
+			// }.bind(this));
 
 			this.cards.push(cardView);
 		}

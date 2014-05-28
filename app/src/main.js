@@ -7,9 +7,10 @@ define(function(require, exports, module) {
 	var DeckView = require('views/DeckView');
 
 	var mainContext = Engine.createContext();
-   	// mainContext.setPerspective(1000);
+	// mainContext.setPerspective(1000);
 
-	var deckView = new DeckView();
+	var CardData = require('data/CardData');
+	var deckView = new DeckView({ cards: CardData });
 
 	// deckView.on('updateIndex', function(index){
 	// 	console.log(index);

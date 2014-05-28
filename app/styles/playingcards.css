@@ -8,34 +8,15 @@
 .card {
   background-color: #fff;
   font-family: 'Suit-Regular', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  -moz-border-radius: 0.8em;
-  -webkit-border-radius: 0.8em;
   border-radius: 0.8em;
-  -moz-box-shadow: 0 0 5px rgba(0,0,0,0.5);
-  -webkit-box-shadow: 0 0 5px rgba(0,0,0,0.5);
-  box-shadow: 0 0 5px rgba(0,0,0,0.5);
-  float: left;
+  /*box-shadow: 0 0 5px rgba(0,0,0,0.5);*/
+  box-shadow: 1px 1px 0 #ccc;
+  border: 1px #777 solid;
   width: 16em;
   height: 22.4em;
-  margin: 0 1.2em 1.2em 0;
   position: relative;
-  z-index: 2;
 }
-.card.noshadow {
-  -moz-box-shadow: none;
-  -webkit-box-shadow: none;
-  box-shadow: none;
-}
-.card .card-back img {
-  width: 16em;
-  height: 22.4em;
-}
-.card .flipped {
-  -ms-transform: rotateY(180deg);
-  -moz-transform: rotateY(180deg);
-  -webkit-transform: rotateY(180deg);
-  transform: rotateY(180deg);
-}
+
 .card .heart,
 .card .diamond {
   color: #df0000;
