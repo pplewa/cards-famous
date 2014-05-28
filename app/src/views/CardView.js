@@ -41,14 +41,14 @@ define(function(require, exports, module) {
 
 		this.draggable = new Draggable({
 			projection: 'x',
-			xRange: [-500, 0],
+			xRange: [-10000, 0],
 			yRange: [0, 0]
 		});
 
 		this.draggable.modify = function modify(target) {
 			var pos = this.getPosition();
 			return {
-				transform: Transform.thenMove(Transform.rotateZ(pos[0]/(1500)), [pos[0], pos[1], 0]),
+				transform: Transform.thenMove(Transform.rotateZ(pos[0]/(5000)), [pos[0], pos[1], 0]),
 				target: target
 			};
 		};
