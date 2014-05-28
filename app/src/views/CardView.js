@@ -48,7 +48,7 @@ define(function(require, exports, module) {
 		this.draggable.modify = function modify(target) {
 			var pos = this.getPosition();
 			return {
-				transform: Transform.thenMove(Transform.rotateZ(pos[0]/(5000)), [pos[0], pos[1], 0]),
+				transform: Transform.thenMove(Transform.rotateZ(pos[0]/(4000)), [pos[0], pos[1], 0]),
 				target: target
 			};
 		};

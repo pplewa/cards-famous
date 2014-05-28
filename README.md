@@ -1,7 +1,7 @@
 #cards famous
-> E.g. Seed project to get started with Famo.us.
+Playing cards slider build with [Famo.us](http://famo.us) and [scalable-css-playing-cards](https://github.com/donpark/scalable-css-playing-cards)
 
-[![Build Status](https://travis-ci.org//cards-famous.svg?branch=master)](https://travis-ci.org//cards-famous) [![Dependency Status](https://david-dm.org//cards-famous.svg)](https://david-dm.org//cards-famous) [![devDependency Status](https://david-dm.org//cards-famous/dev-status.svg)](https://david-dm.org//cards-famous#info=devDependencies)
+![image](app/content/preview.gif)
 
 ##Dependencies
 It is actually quite simple really
